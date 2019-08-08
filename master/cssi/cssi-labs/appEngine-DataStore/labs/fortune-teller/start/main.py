@@ -33,11 +33,12 @@
 import webapp2
 import os
 import random
+import jinja2
 
 
 def get_fortune():
     # Add a list of fortunes to the empty fortune_list array
-    fortune_list=['fortune1', 'fortune2', 'fortune3']
+    fortune_list=['fortune1', 'fortune2', 'fortune3', 'fortune4', 'fortune5']
     
     # instead of "None"
     random_fortune = fortune_list[random.randint(0, len(fortune_list)-1)]
@@ -45,16 +46,28 @@ def get_fortune():
 
 
 # Remember, you can get this by searching for jinja2 google app engine
-jinja_current_directory = "insert jinja2 environment variable here"
-
+jinja_current_directory = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+    extensions=['jinja2.ext.autoescape'],
+    autoescape=True)
 
 class FortuneHandler(webapp2.RequestHandler):
     def get(self):
         # In part 2, instead of returning this string,
         # make a function call that returns a random fortune.
-        message = get_fortune()
-        self.response.write(message)
+        template = jinja_current_directory.get_template('templates/fortune-results.html')
+        replace = {"title" : "What is your Astrological Sign", "message" : ""}
+        self.response.write(template.render(replace))
 
+    def post(self):
+        user_astro_sign = self.request.get('user_astrological_sign')
+
+        template = jinja_current_directory.get_template('templates/fortune-results.html')
+        message = get_fortune()
+        replaces = {"title" : user_astro_sign, "message" : message}
+        self.response.write(template.render(replaces))
+
+    
     # Add a post method
     # def post(self):
 
